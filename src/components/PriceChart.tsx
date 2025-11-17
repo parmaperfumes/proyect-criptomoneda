@@ -411,46 +411,65 @@ export default function PriceChart({ symbol = 'BTC', interval = '1h' }: PriceCha
               </ol>
             </div>
             <button
-              onClick={() => {
-                // Hacer scroll y hacer clic automático
-                const section = document.getElementById('obtener-datos');
-                const btn = document.getElementById('btn-obtener-btc');
+              onClick={async () => {
+                setLoading(true);
+                setError(null);
                 
-                if (section && btn) {
-                  // Scroll suave hacia la sección
-                  section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Mostrar notificación de carga
+                const notification = document.createElement('div');
+                notification.id = 'download-notification';
+                notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-8 py-4 rounded-lg shadow-xl z-50 flex items-center gap-3';
+                notification.innerHTML = `
+                  <svg class="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span class="font-semibold">Descargando datos de ${symbol}... Espera 5-10 segundos</span>
+                `;
+                document.body.appendChild(notification);
+                
+                try {
+                  // Descargar datos directamente
+                  const response = await fetch(`/api/data/${symbol.toLowerCase()}?interval=${interval}&limit=100`);
+                  const result = await response.json();
                   
-                  // Después del scroll, simular clic automático
-                  setTimeout(() => {
-                    btn.click();
+                  // Remover notificación de carga
+                  notification.remove();
+                  
+                  if (result.success && result.data?.data) {
+                    // Mostrar éxito
+                    const success = document.createElement('div');
+                    success.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-lg shadow-xl z-50';
+                    success.innerHTML = `✅ ¡Datos descargados! ${result.data.stats.saved} velas guardadas. Recargando gráfica...`;
+                    document.body.appendChild(success);
                     
-                    // Mostrar notificación
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-lg shadow-xl z-50 flex items-center gap-3';
-                    notification.innerHTML = `
-                      <svg class="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span class="font-semibold">Descargando datos de ${symbol}... Espera unos segundos</span>
-                    `;
-                    document.body.appendChild(notification);
-                    
+                    // Recargar datos después de 1 segundo
                     setTimeout(() => {
-                      notification.remove();
-                      // Mostrar mensaje de éxito
-                      const success = document.createElement('div');
-                      success.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-8 py-4 rounded-lg shadow-xl z-50';
-                      success.innerHTML = '✅ ¡Vuelve arriba para ver la gráfica!';
-                      document.body.appendChild(success);
-                      setTimeout(() => success.remove(), 4000);
-                    }, 8000);
-                  }, 1000);
+                      success.remove();
+                      fetchData();
+                    }, 1500);
+                  } else {
+                    throw new Error(result.error || 'Error al descargar datos');
+                  }
+                } catch (err: any) {
+                  notification.remove();
+                  
+                  // Mostrar error
+                  const errorNotif = document.createElement('div');
+                  errorNotif.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-8 py-4 rounded-lg shadow-xl z-50';
+                  errorNotif.innerHTML = `❌ Error: ${err.message}`;
+                  document.body.appendChild(errorNotif);
+                  setTimeout(() => errorNotif.remove(), 5000);
+                  
+                  setError(err.message);
+                } finally {
+                  setLoading(false);
                 }
               }}
-              className="btn-primary mt-6"
+              disabled={loading}
+              className="btn-primary mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              🚀 Descargar Datos de {symbol} Ahora
+              {loading ? '⏳ Descargando...' : `🚀 Descargar y Mostrar Datos de ${symbol}`}
             </button>
           </div>
         </div>
