@@ -410,12 +410,12 @@ export default function PriceChart({ symbol = 'BTC', interval = '1h' }: PriceCha
                 <li>La gráfica se actualizará automáticamente</li>
               </ol>
             </div>
-            <button
-              onClick={fetchData}
-              className="btn-primary mt-6"
+            <a
+              href="#obtener-datos"
+              className="btn-primary mt-6 inline-block"
             >
-              🔄 Intentar Cargar Datos de {symbol}
-            </button>
+              ⬇️ Ir a Obtener Datos
+            </a>
           </div>
         </div>
       )}

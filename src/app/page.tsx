@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="card text-center">
+      <div id="obtener-datos" className="card text-center">
         <h1 className="text-4xl font-bold text-white mb-4">
           🚀 Crypto Analyzer
         </h1>
