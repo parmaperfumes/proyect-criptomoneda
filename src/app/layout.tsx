@@ -34,16 +34,16 @@ export default function RootLayout({
                 </div>
                 
                 <nav className="flex items-center space-x-4">
-                  <a href="/" className="text-gray-300 hover:text-white transition-colors">
+                  <a href="/" className="text-gray-300 hover:text-white transition-colors text-sm">
                     Dashboard
                   </a>
-                  <a href="/indicators" className="text-gray-300 hover:text-white transition-colors">
+                  <a href="/indicators" className="text-gray-300 hover:text-white transition-colors text-sm">
                     Indicadores
                   </a>
-                  <a href="/signals" className="text-gray-300 hover:text-white transition-colors">
-                    Señales
+                  <a href="/signals" className="text-green-400 hover:text-green-300 transition-colors text-sm font-semibold">
+                    🎯 Señales
                   </a>
-                  <a href="/backtest" className="text-gray-300 hover:text-white transition-colors">
+                  <a href="/backtest" className="text-gray-300 hover:text-white transition-colors text-sm">
                     Backtesting
                   </a>
                 </nav>
