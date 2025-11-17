@@ -47,6 +47,17 @@ export default function PriceChart({ symbol = 'BTC', interval = '1h' }: PriceCha
 
     try {
       const response = await fetch(`/api/data/${symbol.toLowerCase()}?interval=${interval}&limit=100`);
+      
+      // Verificar si la respuesta es válida
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: No se pudieron obtener los datos`);
+      }
+
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('La respuesta no es JSON. Verifica que el servidor esté corriendo correctamente.');
+      }
+
       const result = await response.json();
 
       if (result.success && result.data?.data) {
@@ -98,7 +109,58 @@ export default function PriceChart({ symbol = 'BTC', interval = '1h' }: PriceCha
   };
 
   useEffect(() => {
-    fetchData();
+    // Solo cargar datos si ya existen en la BD (no hacer fetch automático)
+    const loadExistingData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/data/${symbol.toLowerCase()}?interval=${interval}&limit=100`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data?.data && result.data.data.length > 0) {
+            const candles = result.data.data;
+            const formattedData = candles.map((candle: any) => ({
+              timestamp: new Date(candle.timestamp).toLocaleString('es-ES', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+              fullDate: new Date(candle.timestamp).toLocaleString('es-ES'),
+              open: candle.open,
+              high: candle.high,
+              low: candle.low,
+              close: candle.close,
+              volume: candle.volume,
+            }));
+            setData(formattedData);
+            
+            // Calcular estadísticas
+            if (formattedData.length > 0) {
+              const first = formattedData[0];
+              const last = formattedData[formattedData.length - 1];
+              const change = last.close - first.close;
+              const changePercent = (change / first.close) * 100;
+              const high24h = Math.max(...formattedData.map((d: any) => d.high));
+              const low24h = Math.min(...formattedData.map((d: any) => d.low));
+              setStats({
+                current: last.close,
+                change,
+                changePercent,
+                high24h,
+                low24h,
+              });
+            }
+          }
+        }
+      } catch (err) {
+        // Si no hay datos, simplemente no mostrar error
+        console.log('No hay datos disponibles aún');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadExistingData();
   }, [symbol, interval]);
 
   // Tooltip personalizado
@@ -333,11 +395,27 @@ export default function PriceChart({ symbol = 'BTC', interval = '1h' }: PriceCha
         </div>
       ) : (
         <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <p className="text-gray-400 mb-4">No hay datos disponibles</p>
-            <p className="text-sm text-gray-500">
-              Haz clic en &quot;Obtener Datos BTC&quot; para cargar información
+          <div className="text-center max-w-md">
+            <div className="text-6xl mb-4">📊</div>
+            <p className="text-xl text-gray-300 mb-3 font-semibold">No hay datos disponibles</p>
+            <p className="text-sm text-gray-400 mb-6">
+              Para ver la gráfica de {symbol}, primero necesitas obtener los datos desde la API de Binance.
             </p>
+            <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4 text-left">
+              <p className="text-sm text-blue-300 font-semibold mb-2">💡 Cómo obtener datos:</p>
+              <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                <li>Desplázate hacia abajo en la página</li>
+                <li>Haz clic en el botón <strong>&quot;📊 Obtener Datos BTC (1h)&quot;</strong></li>
+                <li>Espera 5-10 segundos mientras se descargan los datos</li>
+                <li>La gráfica se actualizará automáticamente</li>
+              </ol>
+            </div>
+            <button
+              onClick={fetchData}
+              className="btn-primary mt-6"
+            >
+              🔄 Intentar Cargar Datos de {symbol}
+            </button>
           </div>
         </div>
       )}
