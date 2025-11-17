@@ -1,0 +1,119 @@
+// Esquema de base de datos para el sistema de análisis de criptomonedas
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Modelo para almacenar velas de precios (OHLCV)
+model PriceCandle {
+  id        String   @id @default(uuid())
+  symbol    String   // BTC, ETH, etc.
+  timestamp DateTime // Fecha y hora de la vela
+  
+  // Precios OHLC (Open, High, Low, Close)
+  open      Float
+  high      Float
+  low       Float
+  close     Float
+  
+  // Volumen
+  volume    Float
+  
+  // Metadatos
+  interval  String   // 1m, 5m, 15m, 1h, 4h, 1d, etc.
+  source    String   // binance, coingecko, etc.
+  
+  // Timestamps de control
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Índice único para evitar duplicados
+  @@unique([symbol, timestamp, interval, source])
+  
+  // Índices para mejorar consultas
+  @@index([symbol, interval, timestamp])
+  @@index([timestamp])
+  @@map("price_candles")
+}
+
+// Modelo para almacenar señales de trading generadas
+model TradingSignal {
+  id        String   @id @default(uuid())
+  symbol    String
+  timestamp DateTime
+  
+  // Tipo de señal
+  signalType String  // BUY, SELL, HOLD
+  
+  // Precio al momento de la señal
+  price     Float
+  
+  // Indicadores que generaron la señal
+  indicators Json    // { rsi: 30, ema_cross: true, volume_surge: false, ... }
+  
+  // Estrategia usada
+  strategy  String   // rsi_oversold, ema_crossover, combined, etc.
+  
+  // Confianza de la señal (0-100)
+  confidence Float
+  
+  // Metadatos
+  interval  String
+  notes     String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([symbol, timestamp])
+  @@index([signalType, timestamp])
+  @@map("trading_signals")
+}
+
+// Modelo para resultados de backtesting
+model BacktestResult {
+  id          String   @id @default(uuid())
+  
+  // Información de la estrategia
+  strategy    String
+  symbol      String
+  interval    String
+  
+  // Período del backtest
+  startDate   DateTime
+  endDate     DateTime
+  
+  // Métricas de rendimiento
+  totalTrades     Int
+  winningTrades   Int
+  losingTrades    Int
+  winRate         Float
+  
+  // Rendimiento financiero
+  initialCapital  Float
+  finalCapital    Float
+  totalReturn     Float    // Porcentaje
+  maxDrawdown     Float    // Máxima caída desde un pico
+  
+  // Ratios de riesgo/beneficio
+  sharpeRatio     Float?
+  profitFactor    Float?
+  
+  // Configuración de la estrategia
+  parameters  Json     // Parámetros usados en la estrategia
+  
+  // Trades individuales
+  trades      Json     // Array de trades con detalles
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+
+  @@index([strategy, symbol])
+  @@index([createdAt])
+  @@map("backtest_results")
+}
+
