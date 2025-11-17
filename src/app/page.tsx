@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { TrendingUp, Database, Activity, BarChart3 } from 'lucide-react';
+import PriceChart from '@/components/PriceChart';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSymbol, setSelectedSymbol] = useState('BTC');
+  const [selectedInterval, setSelectedInterval] = useState('1h');
 
   // Función para obtener datos de BTC
   const fetchBTCData = async (interval: string = '1h', limit: number = 500) => {
@@ -63,6 +66,46 @@ export default function HomePage() {
           </a>
         </div>
       </div>
+
+      {/* Controles de Gráfica */}
+      <div className="card">
+        <h2 className="text-xl font-semibold text-white mb-4">📈 Gráfica de Precios</h2>
+        <div className="flex flex-wrap gap-4 items-center mb-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Criptomoneda</label>
+            <select
+              value={selectedSymbol}
+              onChange={(e) => setSelectedSymbol(e.target.value)}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none"
+            >
+              <option value="BTC">Bitcoin (BTC)</option>
+              <option value="ETH">Ethereum (ETH)</option>
+              <option value="BNB">Binance Coin (BNB)</option>
+              <option value="SOL">Solana (SOL)</option>
+              <option value="ADA">Cardano (ADA)</option>
+              <option value="XRP">Ripple (XRP)</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-2">Intervalo</label>
+            <select
+              value={selectedInterval}
+              onChange={(e) => setSelectedInterval(e.target.value)}
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg border border-gray-600 focus:border-blue-500 outline-none"
+            >
+              <option value="1m">1 minuto</option>
+              <option value="5m">5 minutos</option>
+              <option value="15m">15 minutos</option>
+              <option value="1h">1 hora</option>
+              <option value="4h">4 horas</option>
+              <option value="1d">1 día</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Gráfica de Precios */}
+      <PriceChart symbol={selectedSymbol} interval={selectedInterval} />
 
       {/* Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
