@@ -40,7 +40,7 @@ export default function HomePage() {
         <p className="text-xl text-gray-300 mb-6">
           Sistema avanzado de análisis de criptomonedas con señales de trading y backtesting
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 flex-wrap">
           <button
             onClick={() => fetchBTCData('1h', 500)}
             disabled={loading}
@@ -55,6 +55,12 @@ export default function HomePage() {
           >
             {loading ? '⏳ Cargando...' : '📈 Obtener Datos BTC (4h)'}
           </button>
+          <a
+            href="/indicators"
+            className="btn-success"
+          >
+            🎯 Ver Indicadores Técnicos
+          </a>
         </div>
       </div>
 

@@ -37,6 +37,9 @@ export default function RootLayout({
                   <a href="/" className="text-gray-300 hover:text-white transition-colors">
                     Dashboard
                   </a>
+                  <a href="/indicators" className="text-gray-300 hover:text-white transition-colors">
+                    Indicadores
+                  </a>
                   <a href="/signals" className="text-gray-300 hover:text-white transition-colors">
                     Señales
                   </a>
