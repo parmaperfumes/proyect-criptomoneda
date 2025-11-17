@@ -45,6 +45,7 @@ export default function HomePage() {
         </p>
         <div className="flex justify-center gap-4 flex-wrap">
           <button
+            id="btn-obtener-btc"
             onClick={() => fetchBTCData('1h', 500)}
             disabled={loading}
             className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"

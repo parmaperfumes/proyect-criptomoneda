@@ -410,12 +410,48 @@ export default function PriceChart({ symbol = 'BTC', interval = '1h' }: PriceCha
                 <li>La gráfica se actualizará automáticamente</li>
               </ol>
             </div>
-            <a
-              href="#obtener-datos"
-              className="btn-primary mt-6 inline-block"
+            <button
+              onClick={() => {
+                // Hacer scroll y hacer clic automático
+                const section = document.getElementById('obtener-datos');
+                const btn = document.getElementById('btn-obtener-btc');
+                
+                if (section && btn) {
+                  // Scroll suave hacia la sección
+                  section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  
+                  // Después del scroll, simular clic automático
+                  setTimeout(() => {
+                    btn.click();
+                    
+                    // Mostrar notificación
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-8 py-4 rounded-lg shadow-xl z-50 flex items-center gap-3';
+                    notification.innerHTML = `
+                      <svg class="w-6 h-6 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span class="font-semibold">Descargando datos de ${symbol}... Espera unos segundos</span>
+                    `;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                      notification.remove();
+                      // Mostrar mensaje de éxito
+                      const success = document.createElement('div');
+                      success.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-8 py-4 rounded-lg shadow-xl z-50';
+                      success.innerHTML = '✅ ¡Vuelve arriba para ver la gráfica!';
+                      document.body.appendChild(success);
+                      setTimeout(() => success.remove(), 4000);
+                    }, 8000);
+                  }, 1000);
+                }
+              }}
+              className="btn-primary mt-6"
             >
-              ⬇️ Ir a Obtener Datos
-            </a>
+              🚀 Descargar Datos de {symbol} Ahora
+            </button>
           </div>
         </div>
       )}
