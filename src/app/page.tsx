@@ -10,6 +10,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedSymbol, setSelectedSymbol] = useState('BTC');
   const [selectedInterval, setSelectedInterval] = useState('1h');
+  const [dataUpdated, setDataUpdated] = useState(0); // Para forzar actualización de gráfica
 
   // Función para obtener datos de BTC
   const fetchBTCData = async (interval: string = '1h', limit: number = 500) => {
@@ -23,6 +24,16 @@ export default function HomePage() {
 
       if (data.success) {
         setResult(data);
+        // Forzar actualización de la gráfica
+        setDataUpdated(prev => prev + 1);
+        
+        // Scroll automático hacia la gráfica después de 2 segundos
+        setTimeout(() => {
+          const chartSection = document.getElementById('price-chart-section');
+          if (chartSection) {
+            chartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 2000);
       } else {
         setError(data.error || 'Error al obtener datos');
       }
@@ -106,7 +117,13 @@ export default function HomePage() {
       </div>
 
       {/* Gráfica de Precios */}
-      <PriceChart symbol={selectedSymbol} interval={selectedInterval} />
+      <div id="price-chart-section">
+        <PriceChart 
+          symbol={selectedSymbol} 
+          interval={selectedInterval} 
+          key={`${selectedSymbol}-${selectedInterval}-${dataUpdated}`}
+        />
+      </div>
 
       {/* Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
